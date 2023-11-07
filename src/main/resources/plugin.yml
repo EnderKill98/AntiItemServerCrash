@@ -1,0 +1,7 @@
+name: AntiItemServerCrash
+author: EnderKill98
+version: '0.0.1'
+description: Fix an annoying crash by flooding the server logs with expensive exceptions
+
+api-version: 1.19
+main: me.enderkill98.antiitemservercrash.AntiItemServerCrashPlugin

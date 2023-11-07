@@ -1,0 +1,55 @@
+import proguard.gradle.ProGuardTask
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.guardsquare:proguard-gradle:7.3.0'
+    }
+}
+
+plugins {
+    id 'java'
+}
+
+group = "me.enderkill98.antiitemservercrash"
+version = "0.0.1"
+
+repositories {
+    maven {
+        name = 'papermc-repo'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+}
+
+def targetJavaVersion = 17
+java {
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}
+
+dependencies {
+    compileOnly("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
+}
+
+ext.baseCoordinates = "${project.name}-${project.version}"
+
+tasks.register('proguard', ProGuardTask) {
+    configuration file('config.pro')
+    injars(tasks.named('jar', Jar).flatMap { it.archiveFile })
+    libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod", jarfilter: '!**.jar', filter: '!module-info.class'
+    outjars(layout.buildDirectory.file("libs/${baseCoordinates}-minified.jar"))
+}
+
+build.finalizedBy(proguard)
